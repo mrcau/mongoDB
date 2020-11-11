@@ -1,0 +1,12 @@
+body{
+  background: lightgreen;
+}
+.navbar{
+  font-weight: 900;
+
+}
+.list{
+  font-size: large;
+  font-weight: 900;
+  color:red;
+}

@@ -1,32 +1,27 @@
 const express = require('express');
 const app = express();
-const bodyParser = require('body-parser');
-app.use(bodyParser.urlencoded({extended: true}))
+const bodyParser = require('body-parser'); //요청값 처리 라이브러리
+app.use(bodyParser.urlencoded({extended: true})) // 요청값
 
 
 
 const MongoClient = require('mongodb').MongoClient;
 const uri = "mongodb+srv://mrcau:998877@cluster0.gxgfo.mongodb.net/<dbname>?retryWrites=true&w=majority";
-const client = new MongoClient(uri, { useNewUrlParser: true });
+const client = new MongoClient(uri);
 
 let db;
+let collection;
 client.connect(err => {
-   err&& console.log(err);
-  
+  err&& console.log(err);
   db=client.db('todoapp');
-  const collection = client.db("todoapp").collection("post");
-  collection.insertOne({_id:4, 이름:'kim', 나이:44}, (err,rst) => {
-    console.log('save');
-  });
+  collection = client.db("todoapp").collection("post");
+  app.listen(8080,()=>{console.log('hi8080')});
 
-  app.listen(8080,()=>{
-    console.log('hi8080');
-  });
 });
 
 
-app.get('/babo',(req,res) => {
-  res.send('바보바보')
+app.get('/list',(req,res) => {
+  res.sendFile(__dirname+'/list.html')
 })
 
 app.get('/write',(req,res) => {
@@ -35,8 +30,12 @@ app.get('/write',(req,res) => {
 
 app.get('/',(req,res) => {
   res.sendFile(__dirname+'/index.html');})
-
+let id=0;
 app.post('/add', function(req, res){
-    console.log(req.body.title);
-    res.send('전송완료')
+    collection.insertOne({_id:id,제목:req.body.title,날짜:req.body.date},() => {
+      console.log(req.body);
+      res.send('전송완료');
+      id++;
+
+    })
   });
