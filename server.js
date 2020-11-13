@@ -11,12 +11,15 @@ const client = new MongoClient(uri,{ useNewUrlParser: true, useUnifiedTopology: 
 
 let db;
 let post;
+let ic;
+let counter;
+let num ;
 client.connect(err => {
-  err&& console.log(err);
+  err && console.log(err);
   db=client.db('todoapp');
   post = client.db("todoapp").collection("post");
+  counter = client.db("todoapp").collection("counter");
   app.listen(8080,()=>{console.log('hi8080')});
-
 });
 
 
@@ -35,10 +38,26 @@ app.get('/',(req,res) => {
   res.sendFile(__dirname+'/index.html');})
 
 app.post('/add', function(req, res){
-    post.insertOne({_id:id,제목:req.body.title,날짜:req.body.date},() => {
-      console.log(req.body);
-      res.send('전송완료');
-      id++;
+    // counter.find().toArray((err,result) => {num = result[0].totalNumber;});
+    counter.findOne({name:'counting'},(err,result) => {
+      num = result.totalNumber;
+      console.log(num);     
+      
+      post.insertOne({_id:num + 1,제목:req.body.title,날짜:req.body.date},(err,result) => {
+        console.log(req.body);
 
-    })
+        counter.updateOne({name:'counting'},{ $inc: {totalNumber:1} },(err,result) => {
+          err && console.log(err);
+          res.send('전송완료');
+         });
+         
+      });
+
+    });
+
   });
+
+//   db.collection('post').insertOne({ _id : 총게시물갯수 + 1, 제목 : 요청.body.title, 날짜 : 요청.body.date }, function (에러, 결과) {
+//     db.collection('counter').updateOne({name:'게시물갯수'},{ $inc: {totalPost:1} },function(에러, 결과){
+// if(에러){return console.log(에러)}
+//       응답.send('전송완료');
