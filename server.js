@@ -25,7 +25,6 @@ client.connect(err => {
 
 app.get('/list',(req,res) => {
   post.find().toArray((err,result) => {
-    console.log(result);
     res.render('list.ejs',{result:result});
   });
 })
@@ -48,14 +47,25 @@ app.post('/add', function(req, res){
 
         counter.updateOne({name:'counting'},{ $inc: {totalNumber:1} },(err,result) => {
           err && console.log(err);
-          res.send('전송완료');
-         });
-         
+          res.sendFile(__dirname+'/index.html');
+         });         
       });
-
     });
-
   });
+
+  
+  app.delete('/delete',(req,res) => {
+    console.log(req.body);
+    const deletItem = parseInt(req.body._id);
+    
+    post.deleteOne({_id:deletItem},(err,result) => {
+      err && console.log(err);
+      console.log(deletItem);
+      console.log('삭제완료');
+      res.status(200).send({message:'성공했습니다'});
+    })
+  })
+
 
 //   db.collection('post').insertOne({ _id : 총게시물갯수 + 1, 제목 : 요청.body.title, 날짜 : 요청.body.date }, function (에러, 결과) {
 //     db.collection('counter').updateOne({name:'게시물갯수'},{ $inc: {totalPost:1} },function(에러, 결과){
