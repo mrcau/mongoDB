@@ -3,7 +3,7 @@ const app = express();
 const bodyParser = require('body-parser'); //요청값 처리 라이브러리
 app.use(bodyParser.urlencoded({extended: true})) // 요청값
 app.set('view engine','ejs');//view engine 으로 ejs(서버데이터 사용가능) 로 쓰겠습니다.
-
+app.use('/public', express.static('public')); // public 폴더를 쓰겠다는 선언
 
 const MongoClient = require('mongodb').MongoClient;
 const uri = "mongodb+srv://mrcau:998877@cluster0.gxgfo.mongodb.net/<dbname>?retryWrites=true&w=majority";

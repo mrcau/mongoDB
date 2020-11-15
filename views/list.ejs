@@ -24,24 +24,25 @@
     </div>
   </nav>
 
-  <div class="container mt-5" style="background:lightcyan; border-radius:12px; border:dashed 1px black;">
+  <div class="container mt-5" style="background:lightcyan; border-radius:12px; ">
     <h2 style="text-align:center; padding:10px;">글 목록</h2>
-  <hr>
-    <!-- <% for(let i=0; i < result.length ; i++) { %>
-    <div class="todo"><span>할일 제목 : <%= result[i].제목 %></span>
-    <span>, 마감 날짜 : <%= result[i].날짜%></span></div>
-    <% } %> -->
-
+  </div>
+  
+  <div class="row row-cols-1 row-cols-md-3" style="margin: 50px;">
     <% result.map((e,i)=>{ %>
-        <div class="todo">
-            <span>&#12800<%= i%10 %>  글번호 : <%= e._id %> . </span>
-            <span>제목 : <%= e.제목 %></span>
-            <span>, 날짜 : <%= e.날짜%></span>
-            <form action=""></form>
-            <button class="btn btn-danger btn-sm delete" data-id="<%= e._id %>">삭제</button>
-            <hr>
+      <div class="col mb-4 todo">
+        <div class="card h-100">
+          <img src="..." class="card-img-top" alt="...">
+            <div class="card-body">
+              <h5 class="card-title">&#12800<%= i%10 %>  <%= e._id %>.<%= e.제목%></h5>
+              <p class="card-text"> a little bit longer.</p>
+            </div>
+            <div class="card-footer" style="width:100%" >
+              <small class="text-muted">날짜 : <%= e.날짜%></small>
+              <button class="btn btn-danger btn-sm delete" data-id="<%= e._id %>" >삭제</button>
+            </div>
         </div>
-        
+      </div>    
     <% }) %>
   </div>
   
@@ -49,24 +50,17 @@
   <script>
     $('.delete').click((e) => {
       let num = e.target.dataset.id;
-
-      $.ajax({
-
-      method : 'DELETE',
-      url : '/delete',
-      data : {_id:num}
-    }).done((result) => {
-      let target = $(this);
-      console.log(target);
-      $(e.target).parent('.todo').fadeOut();
-      console.log(num+'삭제성공3'+this);
-
-    }).fail((a,b,c) => {
-      console.log(a,b,c)
-    });
-
-     })
- 
+        $.ajax({
+        method : 'DELETE',
+        url : '/delete',
+        data : {_id:num}
+      }).done((result) => {
+        $(e.target).parents('.todo').fadeOut();
+        console.log(num+'삭제성공3'+this);
+      }).fail((a,b,c) => {
+        console.log(a,b,c)
+      });
+    })
   </script>
   
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
