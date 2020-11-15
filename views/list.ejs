@@ -49,19 +49,22 @@
   <script>
     $('.delete').click((e) => {
       let num = e.target.dataset.id;
-      console.log('click');
-      $( '.delete' ).parent('.todo').fadeOut();
+     
       $.ajax({
       method : 'DELETE',
       url : '/delete',
       data : {_id:num}
     }).done((result) => {
-      $(this).parent('li').fadeOut();
-      console.log(num+'삭제성공');
+      let target = $(this);
+      console.log(target);
+      target.parent('.todo').fadeOut();
+      console.log(num+'삭제성공3'+this);
+
     }).fail((a,b,c) => {
       console.log(a,b,c)
     });
-    })
+
+     })
  
   </script>
   
