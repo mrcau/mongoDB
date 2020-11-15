@@ -25,6 +25,7 @@ client.connect(err => {
 
 app.get('/list',(req,res) => {
   post.find().toArray((err,result) => {
+    console.log(result);
     res.render('list.ejs',{result:result});
   });
 })
@@ -42,17 +43,19 @@ app.post('/add', function(req, res){
       num = result.totalNumber;
       console.log(num);     
       
-      post.insertOne({_id:num + 1,제목:req.body.title,날짜:req.body.date},(err,result) => {
+        post.insertOne({_id:num + 1,제목:req.body.title,날짜:req.body.date},(err,result) => {
         console.log(req.body);
 
-        counter.updateOne({name:'counting'},{ $inc: {totalNumber:1} },(err,result) => {
+          counter.updateOne({name:'counting'},{ $inc: {totalNumber:1} },(err,result) => {
           err && console.log(err);
           res.sendFile(__dirname+'/index.html');
+          res.send('전송완료');
          });         
       });
     });
   });
 
+  
   
   app.delete('/delete',(req,res) => {
     console.log(req.body);
@@ -66,7 +69,13 @@ app.post('/add', function(req, res){
     })
   })
 
-
+  app.get('/detail/:id',(req,res) => {
+    post.findOne({_id :parseInt(req.params.id)},(err,result) => {
+      res.render('detail.ejs',{idData:result});
+      console.log(result);
+      err && console.log(err);
+    })
+  })
 //   db.collection('post').insertOne({ _id : 총게시물갯수 + 1, 제목 : 요청.body.title, 날짜 : 요청.body.date }, function (에러, 결과) {
 //     db.collection('counter').updateOne({name:'게시물갯수'},{ $inc: {totalPost:1} },function(에러, 결과){
 // if(에러){return console.log(에러)}
