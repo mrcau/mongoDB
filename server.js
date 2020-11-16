@@ -25,17 +25,17 @@ client.connect(err => {
 
 app.get('/list',(req,res) => {
   post.find().toArray((err,result) => {
-    console.log(result);
+    console.log('list는 : '+ result);
     res.render('list.ejs',{result:result});
   });
 })
 
 app.get('/write',(req,res) => {
-  res.sendFile(__dirname+'/write.html')
+  res.render('write.ejs');
 })
 
 app.get('/',(req,res) => {
-  res.sendFile(__dirname+'/index.html');})
+  res.render('index.ejs');})
 
 app.post('/add', function(req, res){
     // counter.find().toArray((err,result) => {num = result[0].totalNumber;});
@@ -44,12 +44,11 @@ app.post('/add', function(req, res){
       console.log(num);     
       
         post.insertOne({_id:num + 1,제목:req.body.title,날짜:req.body.date},(err,result) => {
-        console.log(req.body);
+        console.log('요청값은? '+ req.body);
 
           counter.updateOne({name:'counting'},{ $inc: {totalNumber:1} },(err,result) => {
           err && console.log(err);
-          res.sendFile(__dirname+'/index.html');
-          res.send('전송완료');
+          res.render('list.ejs');
          });         
       });
     });
@@ -76,7 +75,3 @@ app.post('/add', function(req, res){
       err && console.log(err);
     })
   })
-//   db.collection('post').insertOne({ _id : 총게시물갯수 + 1, 제목 : 요청.body.title, 날짜 : 요청.body.date }, function (에러, 결과) {
-//     db.collection('counter').updateOne({name:'게시물갯수'},{ $inc: {totalPost:1} },function(에러, 결과){
-// if(에러){return console.log(에러)}
-//       응답.send('전송완료');
