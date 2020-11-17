@@ -1,15 +1,24 @@
 const express = require('express');
 const app = express();
+app.set('view engine', 'ejs');//view engine 으로 ejs(서버데이터 사용가능) 로 쓰겠습니다.
+app.use('/public', express.static('public')); // public 폴더를 쓰겠다는 선언
+//몽고DB 라이브러리
 const MongoClient = require('mongodb').MongoClient;
 const uri = "mongodb+srv://mrcau:998877@cluster0.gxgfo.mongodb.net/<dbname>?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+// PUT,DELETE 사용 미들웨어
 const methodOverride = require('method-override')
 app.use(methodOverride('_method'));
-const bodyParser = require('body-parser'); //요청값 처리 라이브러리
+//요청값 처리 라이브러리
+const bodyParser = require('body-parser'); 
 app.use(bodyParser.urlencoded({ extended: true })); // 요청값
-app.set('view engine', 'ejs');//view engine 으로 ejs(서버데이터 사용가능) 로 쓰겠습니다.
-app.use('/public', express.static('public')); // public 폴더를 쓰겠다는 선언
-
+//로그인 기능 미들웨어
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+const session = require('express-session');
+app.use(session({secret: '비밀코드', resave : true, saveUninitialized: false}));
+app.use(passport.initialize());
+app.use(passport.session());
 
 let db;
 let post;
