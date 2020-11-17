@@ -23,13 +23,12 @@
         <div class="card h-100">
           <img src="..." class="card-img-top" alt="...">
             <div class="card-body">
-              <a href="/detail/<%= e._id %>"><h5 class="card-title">&#12800<%= i%10 %>  <%= e._id %>.<%= e.제목%></h5></a>
-              <p class="card-text"> a little bit longer.</p>
+             <a href="/detail/<%= e._id %>"><h5 class="card-title">&#12800<%= i%10 %>  <%= e._id %>.<%= e.제목%></h5></a>
+             <p class="card-text"> a little bit longer.</p>
             </div>
             <div class="card-footer" style="width:100%" >
-              <small class="text-muted">날짜 : <%= e.날짜%></small>
-              <button class="btn btn-primary btn-sm edit" data-id="<%= e._id %>" >수정</button>
-              <button class="btn btn-danger btn-sm delete" data-id="<%= e._id %>" >삭제</button>
+             <small class="text-muted">날짜 : <%= e.날짜%></small>
+             <button class="btn btn-danger btn-sm delete" data-id="<%= e._id %>" >삭제</button>
             </div>
         </div>
       </div>    
