@@ -34,6 +34,10 @@ app.get('/write',(req,res) => {
   res.render('write.ejs');
 })
 
+app.get('/edit',(req,res) => {
+  res.render('edit.ejs');
+})
+
 app.get('/',(req,res) => {
   res.render('index.ejs');})
 
@@ -70,7 +74,7 @@ app.post('/add', function(req, res){
 
   app.get('/detail/:id',(req,res) => {
     post.findOne({_id :parseInt(req.params.id)},(err,result) => {
-      res.render('detail.ejs',{idData:result});
+      res.render('detail.ejs',{result:result});
       console.log(result);
       err && console.log(err);
     })
