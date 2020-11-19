@@ -1,5 +1,9 @@
 const express = require('express');
 const app = express();
+// //socket.io 채팅서버 설정 
+// const http = require('http').createServer(app);
+// const io = require('socket.io').listen(http);
+
 app.set('view engine', 'ejs');//view engine 으로 ejs(서버데이터 사용가능) 로 쓰겠습니다.
 app.use('/public', express.static('public')); // public 폴더를 쓰겠다는 선언
 //몽고DB 라이브러리
@@ -17,8 +21,22 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const session = require('express-session');
 app.use(session({secret: '비밀코드', resave : true, saveUninitialized: false}));
-app.use(passport.initialize());
+app.use(passport.initialize()); // 전역 미들웨어
 app.use(passport.session());
+//이미지 저장 라이브러리 사용 세팅
+let multer = require('multer');
+let storage = multer.diskStorage({
+  destination : function(req, file, cb){
+    cb(null, './public/img')
+  },
+  filename : function(req, file, cb){
+    cb(null, file.originalname )
+  }
+});
+let upload = multer({storage : storage});
+
+//내가 만든 API 미들웨어 사용한는 함수 app.use
+app.use('/',require('./routes/shop.js')); // '/' 경로로 접속한 사람들은 이 미들웨어를 적용하게 해줌 지역 미들웨어
 //환경변수 env파일 사용
 //require('dotenv'),config()
 //몽고DB설정
@@ -34,13 +52,18 @@ client.connect(err => {
   post = client.db("todoapp").collection("post");
   counter = client.db("todoapp").collection("counter");
   login = client.db("todoapp").collection("login");
-  app.listen(8080, () => { console.log('hi8080') });
+  app.listen(8080, () => { console.log('hi8080') });//서버실행
 });
+
+//홈페이지 요청처리
+app.get('/', (req, res) => {
+  res.render('index.ejs');
+})
+
 
 //리스트페이지 요청 처리
 app.get('/list', (req, res) => {
   post.find().toArray((err, result) => {
-    console.log('list는 : ' + result);
     res.render('list.ejs',{result:result});
   });
 })
@@ -50,21 +73,13 @@ app.get('/write', (req, res) => {
   res.render('write.ejs');
 })
 
-//홈페이지 요청처리
-app.get('/', (req, res) => {
-  res.render('index.ejs');
-})
-
-//글추가 요청 처리
-app.post('/add', function (req, res) {
-  // counter.find().toArray((err,result) => {num = result[0].totalNumber;});
+app.post('/add', upload.single('load'),function (req, res) {
+  
   counter.findOne({ name: 'counting' }, (err, result) => {
     num = result.totalNumber;
     console.log(num);
 
-    post.insertOne({ _id: num + 1, 제목: req.body.title, 날짜: req.body.date }, (err, result) => {
-      console.log('요청값은? ' + req.body);
-
+    post.insertOne({ _id: num + 1, 제목: title, 날짜: date }, (err, result) => {
       counter.updateOne({ name: 'counting' }, { $inc: { totalNumber: 1 } }, (err, result) => {
         err && console.log(err);
         res.redirect('/list');
@@ -73,6 +88,7 @@ app.post('/add', function (req, res) {
   });
 });
 
+//글수정기능
 app.put('/edit',(req,res) => {
   const upID= parseInt(req.body.id);
   post.updateOne({_id:upID},{$set:{제목:req.body.title,날짜:req.body.date}},() => {
@@ -89,6 +105,7 @@ app.get('/edit/:id', (req, res) => {
   })
 })
 
+//글삭제기능
 app.delete('/delete', (req, res) => {
   console.log(req.body);
   const deletItem = parseInt(req.body._id);
@@ -101,6 +118,7 @@ app.delete('/delete', (req, res) => {
   })
 })
 
+//상세페이지
   app.get('/detail/:id',(req,res) => {
     post.findOne({_id :parseInt(req.params.id)},(err,result) => {
       res.render('detail.ejs',{result:result});
@@ -109,6 +127,20 @@ app.delete('/delete', (req, res) => {
     })
   })
 
+  
+  //이미지서버
+  app.get('/upload',(req,res) => {
+    res.render('upload.ejs');
+  })
+  app.post('/upload',upload.single('load'),(req,res) => {
+    res.redirect('/list');
+  })
+  app.get('/img/:image',(req,res) => {
+    res.sendFile(__dirname+'/public/img/'+req.params.image)
+  })
+  
+
+  //로그인기능
   app.get('/login',(req,res) => {
     res.render('login.ejs');
   })
@@ -165,3 +197,4 @@ app.delete('/delete', (req, res) => {
     })
     
   }); // 세션있으면 어떤 사람인지 해석
+
