@@ -19,52 +19,52 @@ const session = require('express-session');
 app.use(session({secret: '비밀코드', resave : true, saveUninitialized: false}));
 app.use(passport.initialize());
 app.use(passport.session());
-//환경변수 env파일 사용
-//require('dotenv'),config()
-//몽고DB설정
+//이미지 업로드 세팅
+let multer = require('multer'); multer //설치한거 갖다쓰겠습니다~ 라는 뜻
+var storage = multer.diskStorage({
+  destination : function(req, file, cb){
+    cb(null, './public/img')
+  },
+  filename : function(req, file, cb){
+    cb(null, file.originalname )
+  }
+});
+var upload = multer({storage : storage});
+
+//DB변수 세팅
 let db;
 let post;
 let ic;
 let counter;
 let num;
-let login;
 client.connect(err => {
   err && console.log(err);
   db = client.db('todoapp');
   post = client.db("todoapp").collection("post");
   counter = client.db("todoapp").collection("counter");
-  login = client.db("todoapp").collection("login");
   app.listen(8080, () => { console.log('hi8080') });
 });
 
-//리스트페이지 요청 처리
+
 app.get('/list', (req, res) => {
   post.find().toArray((err, result) => {
-    console.log('list는 : ' + result);
     res.render('list.ejs',{result:result});
   });
 })
 
-//글쓰기 페이지 요청처리
 app.get('/write', (req, res) => {
   res.render('write.ejs');
 })
 
-//홈페이지 요청처리
 app.get('/', (req, res) => {
   res.render('index.ejs');
 })
 
-//글추가 요청 처리
-app.post('/add', function (req, res) {
-  // counter.find().toArray((err,result) => {num = result[0].totalNumber;});
+app.post('/add', upload.single('load'),function (req, res) {
   counter.findOne({ name: 'counting' }, (err, result) => {
     num = result.totalNumber;
-    console.log(num);
 
     post.insertOne({ _id: num + 1, 제목: req.body.title, 날짜: req.body.date }, (err, result) => {
-      console.log('요청값은? ' + req.body);
-
       counter.updateOne({ name: 'counting' }, { $inc: { totalNumber: 1 } }, (err, result) => {
         err && console.log(err);
         res.redirect('/list');
@@ -108,60 +108,3 @@ app.delete('/delete', (req, res) => {
       err && console.log(err);
     })
   })
-
-  app.get('/login',(req,res) => {
-    res.render('login.ejs');
-  })
-
-  app.post('/login',passport.authenticate('local',{
-    failureRedirect:'/fail' //로그인 실패시 이동 경로
-  }),(req,res) => {
-    res.redirect('/')
-  })
-
-  app.get('/mypage',Login,(req,res) => {
-    console.log(req.user);
-    res.render('mypage.ejs',{사용자:req.user})
-  })
-
-  function Login(req,res,next){
-    if(req.user){
-      next()
-      }else{
-        res.send('로그인을 해주세요.')
-      }
-
-  }
-
-  //인증방식
-  passport.use(new LocalStrategy({
-    usernameField: 'id', //사용자가 제출한 아이디가 어디 적혔는지 <input>의 name 속성값
-    passwordField: 'pw', //사용자가 제출한 비번이 어디 적혔는지 <input>의 name 속성값
-    session: true,  //요기는 세션을 만들건지
-    passReqToCallback: false, //아이디/비번말고 다른 정보검사가 필요한지(파라미터.body출력)
-  }, function (id, pw, done) {
-    console.log(id, pw);
-    login.findOne({id:id}, function (err, result) {
-      if (err) return done(err)
-  
-      if (!result) return done(null, false, { message: '존재하지않는 아이디요' })
-      if (pw == result.pw) {
-        return done(null, result)
-      } else {
-        return done(null, false, { message: '비번틀렸어요' })
-      }
-    })
-  }));
-
-  //로그인 성고시 세션 데이터 만들어 유지하기
-  passport.serializeUser(function (user, done) {
-    done(null, user.id)
-  }); // 세션만들어 저장
-  
-  passport.deserializeUser(function (id, done) {
-    //DB에서 위에 있는 user.id 로 유저를 찾은뒤에 유저 정보를 밑{}안에 넣음
-    login.findOne({id:id},(err,result) => {
-      done(null,result)
-    })
-    
-  }); // 세션있으면 어떤 사람인지 해석
